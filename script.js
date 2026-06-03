@@ -250,11 +250,6 @@ async function createRoom() {
 }
 
 async function joinRoom(roomIdFromUrl) {
-    if (!sessionStorage.getItem("reloaded")) {
-        sessionStorage.setItem("reloaded", "true");
-        location.reload();
-        return;
-    }
     playerName = prompt("Digite seu nome:");
     if (!playerName) return;
     const roomRef = db.ref("rooms/" + roomIdFromUrl);
@@ -311,8 +306,12 @@ restartBtn.onclick = restartGame;
 closeOverlayBtn.onclick = () => overlay.classList.remove("show");
 
 window.onload = () => {
-    const params = new URLSearchParams(window.location.search);
-    const roomParam = params.get("room");
+    if (!sessionStorage.getItem("reloaded")) {
+        sessionStorage.setItem("reloaded", "true");
+        location.reload();
+        return;
+    }
+    const roomParam = new URLSearchParams(window.location.search).get("room");
     if (roomParam) {
         joinRoom(roomParam);
     }
