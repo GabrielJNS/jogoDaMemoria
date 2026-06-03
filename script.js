@@ -36,19 +36,19 @@ let gameRef = null;
 let localLock = false;
 let timeoutFlip = null;
 
-const GEM_EMOJIS = [
-    "💎", "⭐", "🌈", "🌸", "🍬", "🍭", "🧁", "🐚", "🌙", "✨",
-    "💖", "🍉", "🍒", "🐱", "🐶", "🦄", "🐝", "🌼", "🍰", "🎀",
-    "🪶", "🔮", "🕊️", "🌊", "🔥", "🌿", "🍃", "🌟", "💫", "⚡",
-    "💕", "🍬", "🍡", "🧸", "🎈", "🪄", "💌", "🐢", "🐌", "🦋",
-    "🐞", "🌺", "🍄", "🌻", "🐚", "⭐", "💎", "🌈", "💖", "🌸"
+const EMOJIS = [
+    "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯",
+    "🦁", "🐮", "🐷", "🐸", "🐵", "🐔", "🐧", "🐦", "🐤", "🐴",
+    "🐺", "🐝", "🐛", "🦋", "🐌", "🐞", "🐜", "🦟", "🦗", "🕷️",
+    "🦂", "🐢", "🐍", "🦎", "🐙", "🦑", "🦐", "🦞", "🐠", "🐟",
+    "🐡", "🐬", "🐳", "🐋", "🦈", "🦭", "🐊", "🦕", "🦖", "🍎"
 ];
 
 function generateDeck(gridSize) {
     const totalPairs = (gridSize * gridSize) / 2;
     let selected = [];
     for (let i = 0; i < totalPairs; i++) {
-        selected.push(GEM_EMOJIS[i % GEM_EMOJIS.length]);
+        selected.push(EMOJIS[i % EMOJIS.length]);
     }
     let deck = [];
     selected.forEach(emoji => {
@@ -92,6 +92,16 @@ function renderBoardFromData(data) {
     }
 }
 
+function addTemporarySelection(index) {
+    const cells = document.querySelectorAll(".cell");
+    if (cells[index]) {
+        cells[index].classList.add("selected-effect");
+        setTimeout(() => {
+            if (cells[index]) cells[index].classList.remove("selected-effect");
+        }, 400);
+    }
+}
+
 function checkGameOver(data) {
     if (!data.board) return false;
     const allMatched = data.board.every(card => card.matched === true);
@@ -101,7 +111,7 @@ function checkGameOver(data) {
         let winnerText = "";
         if (p1Score > p2Score) winnerText = `🏆 Jogador 1 (${data.players.player1.name}) venceu! 🎉`;
         else if (p2Score > p1Score) winnerText = `🏆 Jogador 2 (${data.players.player2.name}) venceu! 🎉`;
-        else winnerText = "💖 Empate perfeito! 💖";
+        else winnerText = "🤝 Empate! 🤝";
         winnerMsgSpan.innerText = winnerText;
         overlay.classList.add("show");
         gameRef.update({ active: false, winner: winnerText });
@@ -150,12 +160,14 @@ async function onCardClick(index) {
         return;
     }
     if (data.currentTurn !== myPlayerId) {
-        statusMsg.innerText = `🌟 É a vez do ${data.currentTurn === "player1" ? data.players.player1.name : data.players.player2.name}! Aguarde 🌟`;
+        statusMsg.innerText = `🌟 É a vez de ${data.currentTurn === "player1" ? data.players.player1.name : data.players.player2.name}! Aguarde 🌟`;
         return;
     }
     const card = data.board[index];
     if (card.matched || card.flipped) return;
     if (data.waitingForReset === true) return;
+
+    addTemporarySelection(index);
 
     let newBoard = [...data.board];
     newBoard[index] = { ...card, flipped: true };
@@ -196,7 +208,7 @@ function startListening() {
 
         if (data.active) {
             if (data.currentTurn === myPlayerId) {
-                statusMsg.innerText = "🎀 Sua vez! Escolha uma carta 🎀";
+                statusMsg.innerText = "🎯 Sua vez! Escolha uma carta 🎯";
             } else {
                 const opponent = data.currentTurn === "player1" ? data.players.player1.name : data.players.player2.name;
                 statusMsg.innerText = `🌀 Vez de ${opponent}... aguarde 🌀`;
@@ -212,7 +224,7 @@ async function createRoom() {
     sessionStorage.removeItem("reloaded");
     playerName = playerNameInput.value.trim();
     if (!playerName) {
-        alert("Digite seu nome, flor!");
+        alert("Digite seu nome!");
         return;
     }
     const gridSize = parseInt(gridSelect.value);
@@ -243,17 +255,19 @@ async function joinRoom(roomIdFromUrl) {
         location.reload();
         return;
     }
-    playerName = prompt("Qual seu nome? 💖");
+    playerName = prompt("Digite seu nome:");
     if (!playerName) return;
     const roomRef = db.ref("rooms/" + roomIdFromUrl);
     const snap = await roomRef.get();
     const data = snap.val();
     if (!data) {
-        alert("Sala não encontrada...");
+        alert("Sala não encontrada!");
+        window.location.href = window.location.pathname;
         return;
     }
     if (data.players.player2.name !== "✨ Esperando... ✨") {
-        alert("Sala cheia! Tente outra.");
+        alert("Sala cheia!");
+        window.location.href = window.location.pathname;
         return;
     }
     myPlayerId = "player2";
@@ -288,7 +302,7 @@ function shareRoom() {
     }
     const link = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
     navigator.clipboard.writeText(link);
-    alert("Link copiado! ✨ Compartilhe com um amigo.");
+    alert("Link copiado! Compartilhe com um amigo.");
 }
 
 createBtn.onclick = createRoom;
