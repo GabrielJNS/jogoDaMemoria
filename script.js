@@ -36,59 +36,91 @@ let gameRef = null;
 let localLock = false;
 let timeoutFlip = null;
 
-const EMOJIS = [
-    "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯",
-    "🦁", "🐮", "🐷", "🐸", "🐵", "🐔", "🐧", "🐦", "🐤", "🐴",
-    "🐺", "🐝", "🐛", "🦋", "🐌", "🐞", "🐜", "🦟", "🦗", "🕷️",
-    "🦂", "🐢", "🐍", "🦎", "🐙", "🦑", "🦐", "🦞", "🐠", "🐟",
-    "🐡", "🐬", "🐳", "🐋", "🦈", "🦭", "🐊", "🦕", "🦖", "🍎"
-];
+const CARD_POOL = Array.from({ length: 151 }, (_, i) =>
+    `assets/images/${String(i + 1).padStart(4, "0")}.png`
+);
 
-function generateDeck(gridSize) {
-    const totalPairs = (gridSize * gridSize) / 2;
-    let selected = [];
-    for (let i = 0; i < totalPairs; i++) {
-        selected.push(EMOJIS[i % EMOJIS.length]);
+function generateDeck(gridMode) {
+    let totalPairs;
+    let columns;
+
+    if (gridMode === "all") {
+        totalPairs = CARD_POOL.length;
+        columns = Math.ceil(Math.sqrt(totalPairs * 2));
+    } else {
+        const size = parseInt(gridMode);
+        totalPairs = (size * size) / 2;
+        columns = size;
     }
+
+    if (totalPairs > CARD_POOL.length) {
+        alert(`Você precisa de ${totalPairs} cartas, mas só existem ${CARD_POOL.length} na galeria.`);
+        return null;
+    }
+
+    const shuffled = [...CARD_POOL].sort(() => Math.random() - 0.5);
+    const selected = shuffled.slice(0, totalPairs);
+
     let deck = [];
-    selected.forEach(emoji => {
-        deck.push(emoji, emoji);
+    selected.forEach(img => {
+        deck.push(img, img);
     });
+
     for (let i = deck.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [deck[i], deck[j]] = [deck[j], deck[i]];
     }
-    return deck.map((emoji, idx) => ({
-        id: idx,
-        emoji: emoji,
-        matched: false,
-        flipped: false
-    }));
+
+    return {
+        columns: columns,
+        cards: deck.map((img, idx) => ({
+            id: idx,
+            image: img,
+            matched: false,
+            flipped: false
+        }))
+    };
 }
 
 function renderBoardFromData(data) {
     if (!data || !data.board) return;
     const board = data.board;
-    const gridSize = data.gridSize;
+    const columns = data.columns || data.gridSize;
+
     boardDiv.style.display = "grid";
-    boardDiv.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
-    boardDiv.style.gap = "12px";
-    boardDiv.innerHTML = "";
-    for (let i = 0; i < board.length; i++) {
-        const card = board[i];
-        const cell = document.createElement("div");
-        cell.className = "cell";
-        if (card.matched) {
-            cell.classList.add("matched");
-            cell.innerText = card.emoji;
-        } else if (card.flipped) {
-            cell.classList.add("flipped");
-            cell.innerText = card.emoji;
-        } else {
-            cell.innerText = "?";
+    boardDiv.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+    boardDiv.style.gap = "clamp(4px, 1vw, 10px)";
+
+    if (boardDiv.children.length !== board.length) {
+        boardDiv.innerHTML = "";
+        for (let i = 0; i < board.length; i++) {
+            const cell = document.createElement("div");
+            cell.className = "cell";
+            cell.innerHTML = `
+                <div class="cell-inner">
+                    <div class="cell-face cell-front"></div>
+                    <div class="cell-face cell-back">
+                        <img alt="carta" draggable="false" data-src="">
+                    </div>
+                </div>
+            `;
+            cell.onclick = () => onCardClick(i);
+            boardDiv.appendChild(cell);
         }
-        cell.onclick = () => onCardClick(i);
-        boardDiv.appendChild(cell);
+    }
+
+    for (let i = 0; i < board.length; i++) {
+        const cell = boardDiv.children[i];
+        const card = board[i];
+
+        cell.classList.toggle("flipped", !!card.flipped && !card.matched);
+        cell.classList.toggle("matched", !!card.matched);
+
+        const img = cell.querySelector(".cell-back img");
+        if (img && img.dataset.src !== card.image) {
+            img.src = card.image;
+            img.dataset.src = card.image;
+        }
     }
 }
 
@@ -123,7 +155,7 @@ function checkGameOver(data) {
 async function evaluateMatch(data, idxA, idxB, currentPlayerId) {
     const cardA = data.board[idxA];
     const cardB = data.board[idxB];
-    const isMatch = (cardA.emoji === cardB.emoji);
+    const isMatch = (cardA.image === cardB.image);
     let newBoard = [...data.board];
     let newScores = { ...data.scores };
     let nextTurn = data.currentTurn;
@@ -204,7 +236,7 @@ function startListening() {
         player2NameSpan.innerText = data.players.player2.name;
         scoreP1Span.innerText = data.scores.player1;
         scoreP2Span.innerText = data.scores.player2;
-        roomCodeSpan.innerText = `🏠 Sala: ${roomId}`;
+        roomCodeSpan.innerText = `Sala: ${roomId}`;
 
         if (data.active) {
             if (data.currentTurn === myPlayerId) {
@@ -227,15 +259,19 @@ async function createRoom() {
         alert("Digite seu nome!");
         return;
     }
-    const gridSize = parseInt(gridSelect.value);
+    const gridMode = gridSelect.value;
     myPlayerId = "player1";
-    const deck = generateDeck(gridSize);
+
+    const result = generateDeck(gridMode);
+    if (!result) return;
+
     const newRoom = db.ref("rooms").push();
     roomId = newRoom.key;
 
     await newRoom.set({
-        gridSize: gridSize,
-        board: deck,
+        gridSize: gridMode,
+        columns: result.columns,
+        board: result.cards,
         currentTurn: "player1",
         active: true,
         winner: null,
@@ -276,9 +312,13 @@ async function restartGame() {
     const snap = await gameRef.get();
     const data = snap.val();
     if (!data) return;
-    const newDeck = generateDeck(data.gridSize);
+
+    const result = generateDeck(data.gridSize);
+    if (!result) return;
+
     await gameRef.update({
-        board: newDeck,
+        board: result.cards,
+        columns: result.columns,
         currentTurn: "player1",
         active: true,
         winner: null,
