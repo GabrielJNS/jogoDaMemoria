@@ -37,7 +37,6 @@ let localLock = false;
 let timeoutFlip = null;
 let currentBoardSignature = "";
 
-const MAX_CELL_SIZE = 100;
 
 const CARD_POOL = Array.from({ length: 151 }, (_, i) =>
     `assets/images/${String(i + 1).padStart(4, "0")}.png`
@@ -96,8 +95,9 @@ function renderBoardFromData(data) {
     const signature = buildBoardSignature(board);
 
     boardDiv.style.display = "grid";
-    boardDiv.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
-    boardDiv.style.maxWidth = `${columns * MAX_CELL_SIZE}px`;
+    boardDiv.style.gridTemplateColumns = `repeat(${columns}, minmax(70px, 100px))`;
+    boardDiv.style.maxWidth = "none";
+
 
     const needsRebuild = boardDiv.children.length !== board.length || signature !== currentBoardSignature;
 

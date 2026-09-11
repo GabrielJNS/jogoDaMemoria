@@ -266,8 +266,8 @@ body {
 }
 
 .player2-card {
-    background: linear-gradient(180deg, #ffffff 0%, #fce7f3 100%);
-    border-top: 6px solid var(--pk-pink);
+    background: linear-gradient(180deg, #ffffff 0%, #fce7e7 100%);
+    border-top: 6px solid var(--pk-red);
 }
 
 .avatar {
@@ -393,8 +393,7 @@ body {
     display: grid;
     gap: 10px;
     margin: 0 auto;
-    width: 100%;
-    justify-content: center;
+    width: max-content;;
 }
 
 .cell {
