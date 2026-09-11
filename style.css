@@ -19,24 +19,24 @@
     --pk-pink: #ec4899;
 }
 
+html, body {
+    height: 100%;
+}
+
 body {
     min-height: 100vh;
     font-family: 'Fredoka', system-ui, -apple-system, sans-serif;
-    background: 
+    background:
         radial-gradient(circle at 15% 10%, rgba(238, 21, 21, 0.14), transparent 45%),
         radial-gradient(circle at 85% 90%, rgba(59, 130, 246, 0.10), transparent 45%),
         radial-gradient(circle at 50% 50%, rgba(255, 209, 102, 0.08), transparent 60%),
         linear-gradient(135deg, #fff5f5 0%, #ffeeee 50%, #fff5f5 100%);
     background-attachment: fixed;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     padding: 16px;
     overflow-x: hidden;
-}
-
-.background-gradient {
-    display: none;
 }
 
 .container {
@@ -49,12 +49,11 @@ body {
     background: linear-gradient(180deg, #ffffff 0%, var(--pk-cream) 100%);
     border-radius: 36px;
     padding: 30px 26px;
-    box-shadow: 
+    box-shadow:
         0 0 0 4px var(--pk-red),
         0 0 0 8px var(--pk-dark),
         0 30px 60px -15px rgba(238, 21, 21, 0.4),
         0 0 80px -30px rgba(238, 21, 21, 0.3);
-    transition: all 0.2s;
 }
 
 .header {
@@ -115,7 +114,7 @@ body {
     font-family: 'Press Start 2P', monospace;
     font-size: clamp(0.85rem, 3vw, 1.5rem);
     color: var(--pk-red);
-    text-shadow: 
+    text-shadow:
         2px 2px 0 var(--pk-dark),
         0 0 25px rgba(238, 21, 21, 0.4);
     letter-spacing: 1px;
@@ -150,7 +149,7 @@ body {
     font-weight: 500;
     background: white;
     color: var(--pk-dark);
-    box-shadow: 
+    box-shadow:
         inset 0 2px 4px rgba(0, 0, 0, 0.04),
         0 2px 6px rgba(0, 0, 0, 0.04);
     transition: all 0.2s;
@@ -160,7 +159,7 @@ body {
 .player-setup input:focus,
 .player-setup select:focus {
     border-color: var(--pk-red);
-    box-shadow: 
+    box-shadow:
         inset 0 2px 4px rgba(0, 0, 0, 0.04),
         0 0 0 4px rgba(238, 21, 21, 0.15);
 }
@@ -188,7 +187,7 @@ body {
     font-size: clamp(0.85rem, 3vw, 1rem);
     padding: 14px 22px;
     border-radius: 60px;
-    box-shadow: 
+    box-shadow:
         0 4px 0 var(--pk-dark),
         0 6px 12px rgba(238, 21, 21, 0.3);
     transition: all 0.15s;
@@ -201,7 +200,7 @@ body {
 .restart-btn:hover {
     background: linear-gradient(180deg, #ff6b6b 0%, #ff2020 100%);
     transform: translateY(-2px);
-    box-shadow: 
+    box-shadow:
         0 6px 0 var(--pk-dark),
         0 10px 18px rgba(238, 21, 21, 0.4);
 }
@@ -210,7 +209,7 @@ body {
 #share-room:active,
 .restart-btn:active {
     transform: translateY(3px);
-    box-shadow: 
+    box-shadow:
         0 1px 0 var(--pk-dark),
         0 3px 6px rgba(238, 21, 21, 0.3);
 }
@@ -252,7 +251,7 @@ body {
     min-width: 140px;
     background: white;
     border-radius: 28px;
-    padding: 18px 16px;
+    padding: 20px 16px 18px;
     text-align: center;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
     border: 2px solid rgba(0, 0, 0, 0.05);
@@ -270,9 +269,49 @@ body {
 }
 
 .avatar {
-    font-size: 2.2rem;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-    line-height: 1;
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid var(--pk-dark);
+    background: linear-gradient(180deg, #ffffff 0%, var(--pk-cream) 100%);
+    box-shadow:
+        0 4px 0 rgba(0, 0, 0, 0.12),
+        0 6px 14px rgba(0, 0, 0, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.25s ease;
+    position: relative;
+}
+
+.avatar::after {
+    content: '';
+    position: absolute;
+    top: 6%;
+    left: 12%;
+    width: 30%;
+    height: 18%;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.55);
+    pointer-events: none;
+    filter: blur(1.5px);
+}
+
+.avatar img {
+    width: 92%;
+    height: 92%;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    position: relative;
+    z-index: 1;
+}
+
+.player-card:hover .avatar {
+    transform: translateY(-4px) rotate(-6deg);
 }
 
 .player-card h3 {
@@ -314,12 +353,13 @@ body {
     font-size: clamp(0.85rem, 3vw, 1rem);
     word-break: break-word;
     border: 2px solid rgba(238, 21, 21, 0.15);
-    box-shadow: 
+    box-shadow:
         inset 0 2px 6px rgba(255, 209, 102, 0.15),
         0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .board-wrapper {
+    width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
     border-radius: 28px;
@@ -328,21 +368,35 @@ body {
     -webkit-overflow-scrolling: touch;
     border: 2px solid rgba(26, 26, 26, 0.08);
     box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.05);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(238, 21, 21, 0.4) transparent;
+}
+
+.board-wrapper::-webkit-scrollbar {
+    height: 10px;
+}
+
+.board-wrapper::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 10px;
+}
+
+.board-wrapper::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--pk-red-light), var(--pk-red));
+    border-radius: 10px;
 }
 
 .memory-board {
     display: grid;
-    gap: clamp(4px, 1vw, 10px);
-    justify-content: center;
+    gap: 10px;
     margin: 0 auto;
-    width: fit-content;
-    min-width: 100%;
+    width: 100%;
+    justify-content: center;
 }
 
 .cell {
     aspect-ratio: 1 / 1;
-    min-width: 55px;
-    max-width: 90px;
+    min-width: 72px;
     perspective: 800px;
     cursor: pointer;
     position: relative;
@@ -375,7 +429,7 @@ body {
     inset: 0;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    border-radius: 14px;
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -383,7 +437,7 @@ body {
 }
 
 .cell-front {
-    background: 
+    background:
         radial-gradient(circle at center,
             #f5f5f5 0 9%,
             var(--pk-dark) 9% 12%,
@@ -393,9 +447,9 @@ body {
             var(--pk-dark) 44% 56%,
             #f5f5f5 56% 100%);
     border: 3px solid var(--pk-dark);
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.3),
-        0 4px 0 var(--pk-red-dark);
+        0 5px 0 var(--pk-red-dark);
 }
 
 .cell-front::after {
@@ -416,14 +470,14 @@ body {
     background: linear-gradient(160deg, #ffffff 0%, var(--pk-cream) 100%);
     border: 3px solid #f0c14b;
     transform: rotateY(180deg);
-    box-shadow: 
+    box-shadow:
         inset 0 0 15px rgba(255, 209, 102, 0.25),
-        0 4px 0 var(--pk-gold-dark);
+        0 5px 0 var(--pk-gold-dark);
 }
 
 .cell-back img {
-    width: 85%;
-    height: 85%;
+    width: 86%;
+    height: 86%;
     object-fit: contain;
     pointer-events: none;
     user-select: none;
@@ -434,26 +488,26 @@ body {
 .cell.matched .cell-back {
     background: linear-gradient(160deg, #e6ffe6 0%, #c8f5c8 100%);
     border-color: var(--pk-green);
-    box-shadow: 
+    box-shadow:
         inset 0 0 20px rgba(74, 222, 128, 0.4),
-        0 4px 0 var(--pk-green-dark),
+        0 5px 0 var(--pk-green-dark),
         0 0 25px rgba(74, 222, 128, 0.5);
 }
 
 .cell.selected-effect .cell-front {
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.3),
-        0 4px 0 var(--pk-red-dark),
+        0 5px 0 var(--pk-red-dark),
         0 0 0 4px rgba(255, 209, 102, 0.7),
         0 0 25px rgba(255, 209, 102, 0.8);
 }
 
 @media (hover: hover) {
     .cell:not(.flipped):not(.matched):hover .cell-front {
-        box-shadow: 
+        box-shadow:
             inset 0 0 0 1px rgba(255, 255, 255, 0.3),
-            0 4px 0 var(--pk-red-dark),
-            0 6px 15px rgba(238, 21, 21, 0.4);
+            0 5px 0 var(--pk-red-dark),
+            0 8px 18px rgba(238, 21, 21, 0.4);
     }
 }
 
@@ -483,7 +537,7 @@ body {
     padding: 36px 32px;
     border-radius: 32px;
     text-align: center;
-    box-shadow: 
+    box-shadow:
         0 0 0 4px var(--pk-red),
         0 0 0 8px var(--pk-dark),
         0 30px 60px rgba(0, 0, 0, 0.4);
@@ -540,14 +594,27 @@ body {
     font-size: clamp(1rem, 4vw, 1.1rem);
 }
 
+@media (max-width: 900px) {
+    .cell {
+        min-width: 66px;
+    }
+    .cell-face {
+        border-radius: 14px;
+    }
+    .cell-front,
+    .cell-back {
+        border-width: 3px;
+    }
+}
+
 @media (max-width: 640px) {
     body {
         padding: 10px;
     }
     .game-card {
-        padding: 22px 16px;
+        padding: 22px 14px;
         border-radius: 28px;
-        box-shadow: 
+        box-shadow:
             0 0 0 3px var(--pk-red),
             0 0 0 6px var(--pk-dark),
             0 20px 40px -15px rgba(238, 21, 21, 0.4);
@@ -576,31 +643,43 @@ body {
     .player-card {
         min-width: unset;
     }
+    .avatar {
+        width: 64px;
+        height: 64px;
+    }
     .cell {
-        min-width: 46px;
+        min-width: 64px;
+        perspective: 600px;
     }
     .cell-face {
         border-radius: 12px;
     }
     .cell-front,
     .cell-back {
-        border-width: 2px;
+        border-width: 2.5px;
     }
     .board-wrapper {
         padding: 10px;
         border-radius: 20px;
     }
+    .memory-board {
+        gap: 8px;
+    }
 }
 
 @media (max-width: 480px) {
     .cell {
-        min-width: 38px;
+        min-width: 60px;
     }
     .cell-face {
         border-radius: 10px;
     }
+    .cell-front,
+    .cell-back {
+        border-width: 2px;
+    }
     .memory-board {
-        gap: 5px;
+        gap: 7px;
     }
     .board-wrapper {
         padding: 8px;
@@ -612,13 +691,10 @@ body {
 
 @media (max-width: 380px) {
     .cell {
-        min-width: 32px;
-    }
-    .cell-face {
-        border-radius: 8px;
+        min-width: 56px;
     }
     .memory-board {
-        gap: 4px;
+        gap: 6px;
     }
 }
 

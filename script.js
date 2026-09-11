@@ -36,6 +36,8 @@ let gameRef = null;
 let localLock = false;
 let timeoutFlip = null;
 
+const MAX_CELL_SIZE = 110;
+
 const CARD_POOL = Array.from({ length: 151 }, (_, i) =>
     `assets/images/${String(i + 1).padStart(4, "0")}.png`
 );
@@ -89,7 +91,7 @@ function renderBoardFromData(data) {
 
     boardDiv.style.display = "grid";
     boardDiv.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
-    boardDiv.style.gap = "clamp(4px, 1vw, 10px)";
+    boardDiv.style.maxWidth = `${columns * MAX_CELL_SIZE}px`;
 
     if (boardDiv.children.length !== board.length) {
         boardDiv.innerHTML = "";
@@ -141,9 +143,9 @@ function checkGameOver(data) {
         const p1Score = data.scores.player1;
         const p2Score = data.scores.player2;
         let winnerText = "";
-        if (p1Score > p2Score) winnerText = `🏆 Jogador 1 (${data.players.player1.name}) venceu! 🎉`;
-        else if (p2Score > p1Score) winnerText = `🏆 Jogador 2 (${data.players.player2.name}) venceu! 🎉`;
-        else winnerText = "🤝 Empate! 🤝";
+        if (p1Score > p2Score) winnerText = `Jogador 1 (${data.players.player1.name}) venceu!`;
+        else if (p2Score > p1Score) winnerText = `Jogador 2 (${data.players.player2.name}) venceu!`;
+        else winnerText = "Empate!";
         winnerMsgSpan.innerText = winnerText;
         overlay.classList.add("show");
         gameRef.update({ active: false, winner: winnerText });
@@ -188,11 +190,12 @@ async function onCardClick(index) {
     const snap = await gameRef.get();
     const data = snap.val();
     if (!data || !data.active) {
-        statusMsg.innerText = "✨ A partida acabou! Clique em Nova Rodada ✨";
+        statusMsg.innerText = "A partida acabou. Clique em Nova Rodada.";
         return;
     }
     if (data.currentTurn !== myPlayerId) {
-        statusMsg.innerText = `🌟 É a vez de ${data.currentTurn === "player1" ? data.players.player1.name : data.players.player2.name}! Aguarde 🌟`;
+        const oppName = data.currentTurn === "player1" ? data.players.player1.name : data.players.player2.name;
+        statusMsg.innerText = `É a vez de ${oppName}. Aguarde.`;
         return;
     }
     const card = data.board[index];
@@ -240,13 +243,13 @@ function startListening() {
 
         if (data.active) {
             if (data.currentTurn === myPlayerId) {
-                statusMsg.innerText = "🎯 Sua vez! Escolha uma carta 🎯";
+                statusMsg.innerText = "Sua vez! Escolha uma carta.";
             } else {
                 const opponent = data.currentTurn === "player1" ? data.players.player1.name : data.players.player2.name;
-                statusMsg.innerText = `🌀 Vez de ${opponent}... aguarde 🌀`;
+                statusMsg.innerText = `Vez de ${opponent}. Aguarde.`;
             }
         } else {
-            statusMsg.innerText = "🎮 Jogo finalizado. Clique em Nova Rodada! 🎮";
+            statusMsg.innerText = "Jogo finalizado. Clique em Nova Rodada.";
         }
         checkGameOver(data);
     });
@@ -279,7 +282,7 @@ async function createRoom() {
         scores: { player1: 0, player2: 0 },
         players: {
             player1: { name: playerName },
-            player2: { name: "✨ Esperando... ✨" }
+            player2: { name: "Aguardando..." }
         }
     });
     startListening();
@@ -296,7 +299,7 @@ async function joinRoom(roomIdFromUrl) {
         window.location.href = window.location.pathname;
         return;
     }
-    if (data.players.player2.name !== "✨ Esperando... ✨") {
+    if (data.players.player2.name !== "Aguardando...") {
         alert("Sala cheia!");
         window.location.href = window.location.pathname;
         return;
