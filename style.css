@@ -421,19 +421,17 @@ body {
     --cell-min: 70px;
     --cell-max: 100px;
 }
-.memory-board.board-compact {
-    --cell-min: 44px;
-    --cell-max: 60px;
-    gap: 6px;
-}
 
-.memory-board.board-compact .cell {
-    min-width: 44px;
-    max-width: 60px;
+.memory-board.board-compact {
+    grid-template-columns: repeat(var(--compact-columns, 18), minmax(0, 1fr));
+    gap: 5px;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
 }
 
 .cell {
-  aspect-ratio: 1 / 1;
+    aspect-ratio: 1 / 1;
     width: 100%;
     perspective: 800px;
     cursor: pointer;
@@ -602,7 +600,7 @@ body {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
     height: 50vh;
     min-height: 220px;
-    max-height: 70vh;   
+    max-height: 70vh;
 }
 
 .chat-header {
@@ -754,12 +752,11 @@ body {
     flex-shrink: 0;
     width: 36px;
     height: 36px;
-    font-size: 0.95rem;
     border-radius: 50%;
     border: 2px solid var(--pk-dark);
     background: linear-gradient(180deg, var(--pk-red-light) 0%, var(--pk-red) 100%);
     color: white;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     cursor: pointer;
     box-shadow: 0 3px 0 var(--pk-dark);
     transition: all 0.15s;
@@ -778,8 +775,6 @@ body {
     transform: translateY(2px);
     box-shadow: 0 1px 0 var(--pk-dark);
 }
-
-/* ============ FIM CHAT ============ */
 
 #victory-overlay {
     position: fixed;
@@ -865,10 +860,12 @@ body {
     font-size: clamp(1rem, 4vw, 1.1rem);
 }
 
-
 @media (max-width: 900px) {
     .memory-board {
         gap: 9px;
+    }
+    .memory-board.board-compact {
+        --compact-columns: 14;
     }
     .cell-front,
     .cell-back {
@@ -931,13 +928,8 @@ body {
         gap: 8px;
     }
     .memory-board.board-compact {
-        --cell-min: 42px;
-        --cell-max: 56px;
+        --compact-columns: 12;
         gap: 5px;
-    }
-    .memory-board.board-compact .cell {
-        min-width: 42px;
-        max-width: 56px;
     }
     .cell {
         perspective: 600px;
@@ -953,7 +945,8 @@ body {
     .chat-column {
         height: 40vh;
         min-height: 180px;
-        max-height: 55vh;    }
+        max-height: 55vh;
+    }
 }
 
 @media (max-width: 480px) {
@@ -964,13 +957,8 @@ body {
         gap: 7px;
     }
     .memory-board.board-compact {
-        --cell-min: 40px;
-        --cell-max: 52px;
+        --compact-columns: 10;
         gap: 4px;
-    }
-    .memory-board.board-compact .cell {
-        min-width: 40px;
-        max-width: 52px;
     }
     .header h1 {
         letter-spacing: 0;
@@ -982,15 +970,11 @@ body {
         gap: 6px;
     }
     .memory-board.board-compact {
-        --cell-min: 36px;
-        --cell-max: 48px;
+        --compact-columns: 9;
         gap: 4px;
     }
-    .memory-board.board-compact .cell {
-        min-width: 36px;
-        max-width: 48px;
-    }
 }
+
 @media (prefers-reduced-motion: reduce) {
     .cell,
     .cell-inner {
