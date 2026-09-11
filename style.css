@@ -602,7 +602,8 @@ body {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
     height: 50vh;
     min-height: 220px;
-    max-height: 70vh;
+    max-height: 70vh;   
+}
 
 .chat-header {
     display: flex;
@@ -1008,4 +1009,4 @@ body {
     .points.score-pop {
         animation: none;
     }
-}}
+}
