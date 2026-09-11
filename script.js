@@ -28,19 +28,29 @@ const scoreP2Span = document.getElementById("score-p2");
 const overlay = document.getElementById("victory-overlay");
 const winnerMsgSpan = document.getElementById("winner-message");
 const closeOverlayBtn = document.getElementById("close-overlay");
+const chatMessagesDiv = document.getElementById("chat-messages");
+const chatForm = document.getElementById("chat-form");
+const chatInput = document.getElementById("chat-input");
 
 let roomId = null;
 let myPlayerId = null;
 let playerName = null;
 let gameRef = null;
+let chatRef = null;
 let localLock = false;
 let timeoutFlip = null;
 let currentBoardSignature = "";
-
+let chatInitialized = false;
+let lastRenderedScoreP1 = 0;
+let lastRenderedScoreP2 = 0;
 
 const CARD_POOL = Array.from({ length: 151 }, (_, i) =>
     `assets/images/${String(i + 1).padStart(4, "0")}.png`
 );
+
+function calculateMatchPoints(streak) {
+    return Math.min(10 + (streak - 1) * 5, 50);
+}
 
 function generateDeck(gridMode) {
     let totalPairs;
@@ -94,10 +104,9 @@ function renderBoardFromData(data) {
     const columns = data.columns || data.gridSize;
     const signature = buildBoardSignature(board);
 
-    boardDiv.style.display = "grid";
-    boardDiv.style.gridTemplateColumns = `repeat(${columns}, minmax(70px, 100px))`;
-    boardDiv.style.maxWidth = "none";
-
+  boardDiv.style.display = "grid";
+  boardDiv.style.setProperty("--columns", columns);
+  boardDiv.classList.toggle("board-compact", data.gridSize === "all");
 
     const needsRebuild = boardDiv.children.length !== board.length || signature !== currentBoardSignature;
 
@@ -136,6 +145,30 @@ function renderBoardFromData(data) {
     }
 }
 
+function renderScores(data) {
+    const p1 = data.scores.player1 || 0;
+    const p2 = data.scores.player2 || 0;
+
+    scoreP1Span.innerText = p1;
+    scoreP2Span.innerText = p2;
+
+    if (p1 !== lastRenderedScoreP1) {
+        lastRenderedScoreP1 = p1;
+        popScore(scoreP1Span);
+    }
+    if (p2 !== lastRenderedScoreP2) {
+        lastRenderedScoreP2 = p2;
+        popScore(scoreP2Span);
+    }
+}
+
+function popScore(span) {
+    const parent = span.parentElement;
+    parent.classList.remove("score-pop");
+    void parent.offsetWidth;
+    parent.classList.add("score-pop");
+}
+
 function addTemporarySelection(index) {
     const cells = boardDiv.children;
     if (cells[index]) {
@@ -170,24 +203,32 @@ async function evaluateMatch(data, idxA, idxB, currentPlayerId) {
     const cardA = data.board[idxA];
     const cardB = data.board[idxB];
     const isMatch = (cardA.image === cardB.image);
+
     let newBoard = [...data.board];
     let newScores = { ...data.scores };
+    let newStreaks = { ...(data.streaks || { player1: 0, player2: 0 }) };
     let nextTurn = data.currentTurn;
 
     if (isMatch) {
         newBoard[idxA] = { ...cardA, matched: true, flipped: false };
         newBoard[idxB] = { ...cardB, matched: true, flipped: false };
-        newScores[currentPlayerId] += 1;
+
+        newStreaks[currentPlayerId] = (newStreaks[currentPlayerId] || 0) + 1;
+        const points = calculateMatchPoints(newStreaks[currentPlayerId]);
+        newScores[currentPlayerId] = (newScores[currentPlayerId] || 0) + points;
+
         nextTurn = currentPlayerId;
     } else {
         newBoard[idxA] = { ...cardA, flipped: false };
         newBoard[idxB] = { ...cardB, flipped: false };
+        newStreaks[currentPlayerId] = 0;
         nextTurn = (currentPlayerId === "player1") ? "player2" : "player1";
     }
 
     await gameRef.update({
         board: newBoard,
         scores: newScores,
+        streaks: newStreaks,
         currentTurn: nextTurn,
         waitingForReset: false,
         flippedPairIndices: []
@@ -249,8 +290,7 @@ function startListening() {
         renderBoardFromData(data);
         player1NameSpan.innerText = data.players.player1.name;
         player2NameSpan.innerText = data.players.player2.name;
-        scoreP1Span.innerText = data.scores.player1;
-        scoreP2Span.innerText = data.scores.player2;
+        renderScores(data);
         roomCodeSpan.innerText = `Sala: ${roomId}`;
 
         if (data.active) {
@@ -264,6 +304,63 @@ function startListening() {
             statusMsg.innerText = "Jogo finalizado. Clique em Nova Rodada.";
         }
         checkGameOver(data);
+    });
+
+    startChat();
+}
+
+function startChat() {
+    if (chatRef) chatRef.off();
+    chatRef = db.ref("rooms/" + roomId + "/chat");
+
+    if (!chatInitialized) {
+        chatInitialized = true;
+        chatMessagesDiv.innerHTML = '<div class="chat-empty">Nenhuma mensagem ainda...</div>';
+    }
+
+    chatRef.limitToLast(100).on("child_added", (snapshot) => {
+        const msg = snapshot.val();
+        if (!msg) return;
+        appendChatMessage(msg);
+    });
+}
+
+function appendChatMessage(msg) {
+    const empty = chatMessagesDiv.querySelector(".chat-empty");
+    if (empty) empty.remove();
+
+    const isMine = msg.player === myPlayerId;
+    const wrapper = document.createElement("div");
+    wrapper.className = `chat-msg ${isMine ? "from-me" : "from-other"}`;
+    wrapper.innerHTML = `
+        <span class="msg-name">${escapeHtml(msg.name || "???")}</span>
+        <div class="msg-bubble">${escapeHtml(msg.text || "")}</div>
+    `;
+    chatMessagesDiv.appendChild(wrapper);
+
+    chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+}
+
+function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+async function sendChatMessage(e) {
+    e.preventDefault();
+    if (!roomId || !myPlayerId) return;
+    const text = chatInput.value.trim();
+    if (!text) return;
+
+    chatInput.value = "";
+    chatInput.focus();
+
+    await db.ref("rooms/" + roomId + "/chat").push({
+        player: myPlayerId,
+        name: playerName || "???",
+        text: text,
+        ts: Date.now()
     });
 }
 
@@ -281,6 +378,9 @@ async function createRoom() {
     if (!result) return;
 
     currentBoardSignature = "";
+    chatInitialized = false;
+    lastRenderedScoreP1 = 0;
+    lastRenderedScoreP2 = 0;
 
     const newRoom = db.ref("rooms").push();
     roomId = newRoom.key;
@@ -294,6 +394,7 @@ async function createRoom() {
         winner: null,
         waitingForReset: false,
         scores: { player1: 0, player2: 0 },
+        streaks: { player1: 0, player2: 0 },
         players: {
             player1: { name: playerName },
             player2: { name: "Aguardando..." }
@@ -320,6 +421,8 @@ async function joinRoom(roomIdFromUrl) {
     }
     myPlayerId = "player2";
     roomId = roomIdFromUrl;
+    lastRenderedScoreP1 = data.scores.player1 || 0;
+    lastRenderedScoreP2 = data.scores.player2 || 0;
     await roomRef.child("players/player2").set({ name: playerName });
     startListening();
 }
@@ -342,7 +445,8 @@ async function restartGame() {
         active: true,
         winner: null,
         waitingForReset: false,
-        scores: { player1: 0, player2: 0 }
+        scores: { player1: 0, player2: 0 },
+        streaks: { player1: 0, player2: 0 }
     });
     localLock = false;
     if (timeoutFlip) clearTimeout(timeoutFlip);
@@ -363,6 +467,7 @@ createBtn.onclick = createRoom;
 shareBtn.onclick = shareRoom;
 restartBtn.onclick = restartGame;
 closeOverlayBtn.onclick = () => overlay.classList.remove("show");
+chatForm.onsubmit = sendChatMessage;
 
 window.onload = () => {
     if (!sessionStorage.getItem("reloaded")) {

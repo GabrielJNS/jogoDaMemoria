@@ -62,8 +62,26 @@
                 Aguardando jogadores...
             </div>
 
-            <div class="board-wrapper">
-                <div class="memory-board" id="memory-board"></div>
+            <div class="game-content">
+                <div class="board-column">
+                    <div class="board-wrapper">
+                        <div class="memory-board" id="memory-board"></div>
+                    </div>
+                </div>
+
+                <aside class="chat-column">
+                    <div class="chat-header">
+                        <span class="chat-dot"></span>
+                        <h4>Chat</h4>
+                    </div>
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="chat-empty">Nenhuma mensagem ainda...</div>
+                    </div>
+                    <form class="chat-form" id="chat-form" autocomplete="off">
+                        <input type="text" id="chat-input" placeholder="Digite uma mensagem..." maxlength="200">
+                        <button type="submit" aria-label="Enviar">➤</button>
+                    </form>
+                </aside>
             </div>
 
             <button id="restart-game" class="restart-btn">Nova Rodada</button>

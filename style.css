@@ -43,7 +43,7 @@ body {
 
 .container {
     width: 100%;
-    max-width: 1400px;
+    max-width: 1500px;
     margin: 0 auto;
 }
 
@@ -266,8 +266,8 @@ body {
 }
 
 .player2-card {
-    background: linear-gradient(180deg, #ffffff 0%, #fce7e7 100%);
-    border-top: 6px solid var(--pk-red);
+    background: linear-gradient(180deg, #ffffff 0%, #fce7f3 100%);
+    border-top: 6px solid var(--pk-pink);
 }
 
 .avatar {
@@ -343,6 +343,17 @@ body {
     border: 2px solid var(--pk-dark);
     box-shadow: 0 3px 0 var(--pk-dark);
     text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+    transition: transform 0.2s ease;
+}
+
+.points.score-pop {
+    animation: scorePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes scorePop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.25); }
+    100% { transform: scale(1); }
 }
 
 .turn-status {
@@ -359,6 +370,18 @@ body {
     box-shadow:
         inset 0 2px 6px rgba(255, 209, 102, 0.15),
         0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: background 0.3s;
+}
+
+.game-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    align-items: start;
+}
+
+.board-column {
+    min-width: 0;
 }
 
 .board-wrapper {
@@ -391,15 +414,26 @@ body {
 
 .memory-board {
     display: grid;
+    grid-template-columns: repeat(var(--columns), minmax(var(--cell-min, 70px), var(--cell-max, 100px)));
     gap: 10px;
     margin: 0 auto;
-    width: max-content;;
+    width: max-content;
+    --cell-min: 70px;
+    --cell-max: 100px;
+}
+.memory-board.board-compact {
+    --cell-min: 44px;
+    --cell-max: 60px;
+    gap: 6px;
+}
+
+.memory-board.board-compact .cell {
+    min-width: 44px;
+    max-width: 60px;
 }
 
 .cell {
-    aspect-ratio: 1 / 1;
-    min-width: 70px;
-    max-width: 100px;
+  aspect-ratio: 1 / 1;
     width: 100%;
     perspective: 800px;
     cursor: pointer;
@@ -558,6 +592,194 @@ body {
     100% { transform: scale(1); }
 }
 
+/* ============ CHAT ============ */
+
+.chat-column {
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, #ffffff 0%, var(--pk-cream) 100%);
+    border-radius: 24px;
+    border: 2px solid rgba(238, 21, 21, 0.15);
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    height: 520px;
+}
+
+.chat-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    background: linear-gradient(180deg, var(--pk-red-light) 0%, var(--pk-red) 100%);
+    color: white;
+    border-bottom: 3px solid var(--pk-dark);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+}
+
+.chat-header h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.chat-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--pk-green);
+    box-shadow: 0 0 0 2px var(--pk-dark), 0 0 10px var(--pk-green);
+    animation: chatBlink 1.6s ease-in-out infinite;
+}
+
+@keyframes chatBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(238, 21, 21, 0.4) transparent;
+}
+
+.chat-messages::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 10px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--pk-red-light), var(--pk-red));
+    border-radius: 10px;
+}
+
+.chat-empty {
+    color: #94a3b8;
+    text-align: center;
+    font-size: 0.85rem;
+    font-style: italic;
+    padding: 20px 10px;
+}
+
+.chat-msg {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    animation: msgIn 0.25s ease;
+    max-width: 85%;
+}
+
+.chat-msg.from-me {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+
+.chat-msg.from-other {
+    align-self: flex-start;
+    align-items: flex-start;
+}
+
+.chat-msg .msg-name {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #64748b;
+    letter-spacing: 0.5px;
+    padding: 0 6px;
+}
+
+.chat-msg .msg-bubble {
+    padding: 8px 14px;
+    border-radius: 18px;
+    font-size: 0.9rem;
+    line-height: 1.35;
+    word-break: break-word;
+    border: 2px solid var(--pk-dark);
+    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.12);
+    color: white;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.18);
+}
+
+.chat-msg.from-me .msg-bubble {
+    background: linear-gradient(180deg, #60a5fa 0%, var(--pk-blue) 100%);
+    border-radius: 18px 18px 4px 18px;
+}
+
+.chat-msg.from-other .msg-bubble {
+    background: linear-gradient(180deg, #f47b72 0%, var(--pk-red) 100%);
+    border-radius: 18px 18px 18px 4px;
+}
+
+@keyframes msgIn {
+    0% { opacity: 0; transform: translateY(6px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.chat-form {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    border-top: 2px solid rgba(238, 21, 21, 0.15);
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.chat-form input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px solid rgba(238, 21, 21, 0.2);
+    border-radius: 30px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    background: white;
+    color: var(--pk-dark);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-width: 0;
+}
+
+.chat-form input:focus {
+    border-color: var(--pk-red);
+    box-shadow: 0 0 0 3px rgba(238, 21, 21, 0.15);
+}
+
+.chat-form button {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 2px solid var(--pk-dark);
+    background: linear-gradient(180deg, var(--pk-red-light) 0%, var(--pk-red) 100%);
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 3px 0 var(--pk-dark);
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+}
+
+.chat-form button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 var(--pk-dark);
+}
+
+.chat-form button:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--pk-dark);
+}
+
+/* ============ FIM CHAT ============ */
+
 #victory-overlay {
     position: fixed;
     inset: 0;
@@ -642,16 +864,22 @@ body {
     font-size: clamp(1rem, 4vw, 1.1rem);
 }
 
+@media (min-width: 900px) {
+    .game-content {
+        grid-template-columns: minmax(0, 1fr) 320px;
+    }
+}
+
 @media (max-width: 900px) {
     .memory-board {
         gap: 9px;
     }
-    .cell {
-        min-width: 68px;
-    }
     .cell-front,
     .cell-back {
         border-width: 3px;
+    }
+    .chat-column {
+        height: 400px;
     }
 }
 
@@ -700,10 +928,20 @@ body {
         border-radius: 20px;
     }
     .memory-board {
+        --cell-min: 70px;
+        --cell-max: 90px;
         gap: 8px;
     }
+    .memory-board.board-compact {
+        --cell-min: 42px;
+        --cell-max: 56px;
+        gap: 5px;
+    }
+    .memory-board.board-compact .cell {
+        min-width: 42px;
+        max-width: 56px;
+    }
     .cell {
-        min-width: 70px;
         perspective: 600px;
     }
     .cell-front,
@@ -714,6 +952,9 @@ body {
         width: 24%;
         height: 14%;
     }
+    .chat-column {
+        height: 340px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -723,8 +964,14 @@ body {
     .memory-board {
         gap: 7px;
     }
-    .cell {
-        min-width: 68px;
+    .memory-board.board-compact {
+        --cell-min: 40px;
+        --cell-max: 52px;
+        gap: 4px;
+    }
+    .memory-board.board-compact .cell {
+        min-width: 40px;
+        max-width: 52px;
     }
     .header h1 {
         letter-spacing: 0;
@@ -732,14 +979,19 @@ body {
 }
 
 @media (max-width: 380px) {
-    .cell {
-        min-width: 64px;
-    }
     .memory-board {
         gap: 6px;
     }
+    .memory-board.board-compact {
+        --cell-min: 36px;
+        --cell-max: 48px;
+        gap: 4px;
+    }
+    .memory-board.board-compact .cell {
+        min-width: 36px;
+        max-width: 48px;
+    }
 }
-
 @media (prefers-reduced-motion: reduce) {
     .cell,
     .cell-inner {
@@ -750,6 +1002,12 @@ body {
         animation: none;
     }
     .victory-box {
+        animation: none;
+    }
+    .chat-msg {
+        animation: none;
+    }
+    .points.score-pop {
         animation: none;
     }
 }
