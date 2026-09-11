@@ -872,9 +872,9 @@ body {
         border-width: 3px;
     }
     .chat-column {
-        height: 45vh;
-        min-height: 200px;
-        max-height: 60vh;
+        height: 32vh;
+        min-height: 160px;
+        max-height: 40vh;
     }
 }
 
@@ -943,9 +943,9 @@ body {
         height: 14%;
     }
     .chat-column {
-        height: 40vh;
-        min-height: 180px;
-        max-height: 55vh;
+        height: 28vh;
+        min-height: 140px;
+        max-height: 35vh;
     }
 }
 
@@ -963,6 +963,11 @@ body {
     .header h1 {
         letter-spacing: 0;
     }
+    .chat-column {
+        height: 26vh;
+        min-height: 130px;
+        max-height: 32vh;
+    }
 }
 
 @media (max-width: 380px) {
@@ -974,6 +979,7 @@ body {
         gap: 4px;
     }
 }
+
 
 @media (prefers-reduced-motion: reduce) {
     .cell,
