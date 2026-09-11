@@ -592,8 +592,6 @@ body {
     100% { transform: scale(1); }
 }
 
-/* ============ CHAT ============ */
-
 .chat-column {
     display: flex;
     flex-direction: column;
@@ -602,8 +600,9 @@ body {
     border: 2px solid rgba(238, 21, 21, 0.15);
     overflow: hidden;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-    height: 520px;
-}
+    height: 50vh;
+    min-height: 220px;
+    max-height: 70vh;
 
 .chat-header {
     display: flex;
@@ -725,15 +724,15 @@ body {
 
 .chat-form {
     display: flex;
-    gap: 8px;
-    padding: 12px;
+    gap: 6px;
+    padding: 8px 10px;
     border-top: 2px solid rgba(238, 21, 21, 0.15);
     background: rgba(255, 255, 255, 0.6);
 }
 
 .chat-form input {
     flex: 1;
-    padding: 10px 14px;
+    padding: 8px 12px;
     border: 2px solid rgba(238, 21, 21, 0.2);
     border-radius: 30px;
     font-size: 0.9rem;
@@ -752,8 +751,9 @@ body {
 
 .chat-form button {
     flex-shrink: 0;
-    width: 42px;
-    height: 42px;
+    width: 36px;
+    height: 36px;
+    font-size: 0.95rem;
     border-radius: 50%;
     border: 2px solid var(--pk-dark);
     background: linear-gradient(180deg, var(--pk-red-light) 0%, var(--pk-red) 100%);
@@ -864,11 +864,6 @@ body {
     font-size: clamp(1rem, 4vw, 1.1rem);
 }
 
-@media (min-width: 900px) {
-    .game-content {
-        grid-template-columns: minmax(0, 1fr) 320px;
-    }
-}
 
 @media (max-width: 900px) {
     .memory-board {
@@ -879,7 +874,9 @@ body {
         border-width: 3px;
     }
     .chat-column {
-        height: 400px;
+        height: 45vh;
+        min-height: 200px;
+        max-height: 60vh;
     }
 }
 
@@ -953,8 +950,9 @@ body {
         height: 14%;
     }
     .chat-column {
-        height: 340px;
-    }
+        height: 40vh;
+        min-height: 180px;
+        max-height: 55vh;    }
 }
 
 @media (max-width: 480px) {
