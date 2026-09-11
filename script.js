@@ -35,8 +35,9 @@ let playerName = null;
 let gameRef = null;
 let localLock = false;
 let timeoutFlip = null;
+let currentBoardSignature = "";
 
-const MAX_CELL_SIZE = 110;
+const MAX_CELL_SIZE = 100;
 
 const CARD_POOL = Array.from({ length: 151 }, (_, i) =>
     `assets/images/${String(i + 1).padStart(4, "0")}.png`
@@ -84,20 +85,29 @@ function generateDeck(gridMode) {
     };
 }
 
+function buildBoardSignature(board) {
+    return board.length + "|" + (board[0]?.image || "");
+}
+
 function renderBoardFromData(data) {
     if (!data || !data.board) return;
     const board = data.board;
     const columns = data.columns || data.gridSize;
+    const signature = buildBoardSignature(board);
 
     boardDiv.style.display = "grid";
     boardDiv.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
     boardDiv.style.maxWidth = `${columns * MAX_CELL_SIZE}px`;
 
-    if (boardDiv.children.length !== board.length) {
+    const needsRebuild = boardDiv.children.length !== board.length || signature !== currentBoardSignature;
+
+    if (needsRebuild) {
+        currentBoardSignature = signature;
         boardDiv.innerHTML = "";
         for (let i = 0; i < board.length; i++) {
             const cell = document.createElement("div");
             cell.className = "cell";
+            cell.style.animationDelay = `${Math.min(i * 8, 900)}ms`;
             cell.innerHTML = `
                 <div class="cell-inner">
                     <div class="cell-face cell-front"></div>
@@ -127,12 +137,14 @@ function renderBoardFromData(data) {
 }
 
 function addTemporarySelection(index) {
-    const cells = document.querySelectorAll(".cell");
+    const cells = boardDiv.children;
     if (cells[index]) {
+        cells[index].classList.remove("selected-effect");
+        void cells[index].offsetWidth;
         cells[index].classList.add("selected-effect");
         setTimeout(() => {
             if (cells[index]) cells[index].classList.remove("selected-effect");
-        }, 400);
+        }, 450);
     }
 }
 
@@ -224,7 +236,7 @@ async function onCardClick(index) {
             const finalData = finalSnap.val();
             await evaluateMatch(finalData, i1, i2, updatedData.currentTurn);
             localLock = false;
-        }, 550);
+        }, 620);
     }
 }
 
@@ -267,6 +279,8 @@ async function createRoom() {
 
     const result = generateDeck(gridMode);
     if (!result) return;
+
+    currentBoardSignature = "";
 
     const newRoom = db.ref("rooms").push();
     roomId = newRoom.key;
@@ -318,6 +332,8 @@ async function restartGame() {
 
     const result = generateDeck(data.gridSize);
     if (!result) return;
+
+    currentBoardSignature = "";
 
     await gameRef.update({
         board: result.cards,

@@ -19,12 +19,12 @@
     --pk-pink: #ec4899;
 }
 
-html, body {
-    height: 100%;
+html {
+    overflow-x: hidden;
 }
 
 body {
-    min-height: 100vh;
+    min-height: 100dvh;
     font-family: 'Fredoka', system-ui, -apple-system, sans-serif;
     background:
         radial-gradient(circle at 15% 10%, rgba(238, 21, 21, 0.14), transparent 45%),
@@ -35,8 +35,9 @@ body {
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding: 16px;
-    overflow-x: hidden;
+    padding: 16px 16px 40px;
+    overflow-x: clip;
+    -webkit-overflow-scrolling: touch;
 }
 
 .container {
@@ -48,7 +49,7 @@ body {
 .game-card {
     background: linear-gradient(180deg, #ffffff 0%, var(--pk-cream) 100%);
     border-radius: 36px;
-    padding: 30px 26px;
+    padding: 30px 26px 34px;
     box-shadow:
         0 0 0 4px var(--pk-red),
         0 0 0 8px var(--pk-dark),
@@ -297,6 +298,7 @@ body {
     background: rgba(255, 255, 255, 0.55);
     pointer-events: none;
     filter: blur(1.5px);
+    z-index: 2;
 }
 
 .avatar img {
@@ -364,7 +366,7 @@ body {
     overflow-y: hidden;
     border-radius: 28px;
     background: linear-gradient(180deg, rgba(26, 26, 26, 0.03) 0%, rgba(26, 26, 26, 0.06) 100%);
-    padding: 14px;
+    padding: 16px 14px 22px;
     -webkit-overflow-scrolling: touch;
     border: 2px solid rgba(26, 26, 26, 0.08);
     box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.05);
@@ -396,15 +398,18 @@ body {
 
 .cell {
     aspect-ratio: 1 / 1;
-    min-width: 72px;
+    min-width: 70px;
+    max-width: 100px;
+    width: 100%;
     perspective: 800px;
     cursor: pointer;
     position: relative;
     transition: transform 0.15s ease;
+    animation: dealIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 
 .cell:active {
-    transform: translateY(2px) scale(0.98);
+    transform: translateY(2px) scale(0.97);
 }
 
 .cell.matched {
@@ -416,7 +421,7 @@ body {
     width: 100%;
     height: 100%;
     transform-style: preserve-3d;
-    transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cell.flipped .cell-inner,
@@ -429,55 +434,63 @@ body {
     inset: 0;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    border-radius: 16px;
+    border-radius: 50%;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
 }
 
 .cell-front {
     background:
         radial-gradient(circle at center,
-            #f5f5f5 0 9%,
-            var(--pk-dark) 9% 12%,
-            transparent 12%),
+            #f5f5f5 0 11%,
+            var(--pk-dark) 11% 15%,
+            transparent 15%),
         linear-gradient(to bottom,
-            var(--pk-red) 0 44%,
-            var(--pk-dark) 44% 56%,
-            #f5f5f5 56% 100%);
+            transparent 0 45%,
+            var(--pk-dark) 45% 55%,
+            transparent 55% 100%),
+        linear-gradient(to bottom,
+            var(--pk-red) 0 50%,
+            #f5f5f5 50% 100%);
     border: 3px solid var(--pk-dark);
     box-shadow:
-        inset 0 0 0 1px rgba(255, 255, 255, 0.3),
-        0 5px 0 var(--pk-red-dark);
+        inset 0 6px 10px rgba(255, 255, 255, 0.25),
+        inset 0 -6px 10px rgba(0, 0, 0, 0.15),
+        0 5px 0 var(--pk-red-dark),
+        0 8px 18px rgba(238, 21, 21, 0.28);
 }
 
 .cell-front::after {
     content: '';
     position: absolute;
-    top: 12%;
-    left: 18%;
-    width: 22%;
-    height: 14%;
+    top: 10%;
+    left: 22%;
+    width: 26%;
+    height: 16%;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.65);
-    transform: rotate(-20deg);
-    filter: blur(1px);
+    background: rgba(255, 255, 255, 0.75);
+    transform: rotate(-25deg);
+    filter: blur(1.5px);
     pointer-events: none;
 }
 
 .cell-back {
-    background: linear-gradient(160deg, #ffffff 0%, var(--pk-cream) 100%);
-    border: 3px solid #f0c14b;
+    background:
+        radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.9) 0%, transparent 45%),
+        linear-gradient(160deg, #ffffff 0%, var(--pk-cream) 100%);
+    border: 3px solid var(--pk-gold);
     transform: rotateY(180deg);
     box-shadow:
-        inset 0 0 15px rgba(255, 209, 102, 0.25),
-        0 5px 0 var(--pk-gold-dark);
+        inset 0 0 15px rgba(255, 209, 102, 0.35),
+        0 5px 0 var(--pk-gold-dark),
+        0 8px 18px rgba(224, 168, 0, 0.25);
 }
 
 .cell-back img {
-    width: 86%;
-    height: 86%;
+    width: 76%;
+    height: 76%;
     object-fit: contain;
     pointer-events: none;
     user-select: none;
@@ -486,29 +499,62 @@ body {
 }
 
 .cell.matched .cell-back {
-    background: linear-gradient(160deg, #e6ffe6 0%, #c8f5c8 100%);
+    background:
+        radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.9) 0%, transparent 45%),
+        linear-gradient(160deg, #e6ffe6 0%, #c8f5c8 100%);
     border-color: var(--pk-green);
     box-shadow:
-        inset 0 0 20px rgba(74, 222, 128, 0.4),
+        inset 0 0 22px rgba(74, 222, 128, 0.5),
         0 5px 0 var(--pk-green-dark),
-        0 0 25px rgba(74, 222, 128, 0.5);
+        0 0 30px rgba(74, 222, 128, 0.55);
+    animation: matchPulse 0.6s ease;
 }
 
 .cell.selected-effect .cell-front {
+    animation: pokeballWobble 0.4s ease;
     box-shadow:
-        inset 0 0 0 1px rgba(255, 255, 255, 0.3),
+        inset 0 6px 10px rgba(255, 255, 255, 0.25),
+        inset 0 -6px 10px rgba(0, 0, 0, 0.15),
         0 5px 0 var(--pk-red-dark),
         0 0 0 4px rgba(255, 209, 102, 0.7),
-        0 0 25px rgba(255, 209, 102, 0.8);
+        0 0 25px rgba(255, 209, 102, 0.85);
 }
 
 @media (hover: hover) {
     .cell:not(.flipped):not(.matched):hover .cell-front {
         box-shadow:
-            inset 0 0 0 1px rgba(255, 255, 255, 0.3),
+            inset 0 6px 10px rgba(255, 255, 255, 0.25),
+            inset 0 -6px 10px rgba(0, 0, 0, 0.15),
             0 5px 0 var(--pk-red-dark),
-            0 8px 18px rgba(238, 21, 21, 0.4);
+            0 10px 22px rgba(238, 21, 21, 0.45);
     }
+}
+
+@keyframes dealIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.6) rotate(-15deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotate(0deg);
+    }
+}
+
+@keyframes pokeballWobble {
+    0% { transform: rotate(0deg); }
+    20% { transform: rotate(-12deg); }
+    40% { transform: rotate(10deg); }
+    60% { transform: rotate(-6deg); }
+    80% { transform: rotate(4deg); }
+    100% { transform: rotate(0deg); }
+}
+
+@keyframes matchPulse {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.12); }
+    60% { transform: scale(0.96); }
+    100% { transform: scale(1); }
 }
 
 #victory-overlay {
@@ -543,12 +589,13 @@ body {
         0 30px 60px rgba(0, 0, 0, 0.4);
     width: 100%;
     max-width: 420px;
-    animation: victoryPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: victoryPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes victoryPop {
-    from { transform: scale(0.7); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+    0% { transform: scale(0.5) rotate(-8deg); opacity: 0; }
+    60% { transform: scale(1.05) rotate(2deg); }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 
 .victory-box h2 {
@@ -595,11 +642,11 @@ body {
 }
 
 @media (max-width: 900px) {
-    .cell {
-        min-width: 66px;
+    .memory-board {
+        gap: 9px;
     }
-    .cell-face {
-        border-radius: 14px;
+    .cell {
+        min-width: 68px;
     }
     .cell-front,
     .cell-back {
@@ -609,10 +656,10 @@ body {
 
 @media (max-width: 640px) {
     body {
-        padding: 10px;
+        padding: 12px 10px 40px;
     }
     .game-card {
-        padding: 22px 14px;
+        padding: 22px 12px 30px;
         border-radius: 28px;
         box-shadow:
             0 0 0 3px var(--pk-red),
@@ -647,42 +694,36 @@ body {
         width: 64px;
         height: 64px;
     }
-    .cell {
-        min-width: 64px;
-        perspective: 600px;
-    }
-    .cell-face {
-        border-radius: 12px;
-    }
-    .cell-front,
-    .cell-back {
-        border-width: 2.5px;
-    }
     .board-wrapper {
-        padding: 10px;
+        padding: 14px 10px 22px;
         border-radius: 20px;
     }
     .memory-board {
         gap: 8px;
     }
-}
-
-@media (max-width: 480px) {
     .cell {
-        min-width: 60px;
-    }
-    .cell-face {
-        border-radius: 10px;
+        min-width: 70px;
+        perspective: 600px;
     }
     .cell-front,
     .cell-back {
-        border-width: 2px;
+        border-width: 2.5px;
+    }
+    .cell-front::after {
+        width: 24%;
+        height: 14%;
+    }
+}
+
+@media (max-width: 480px) {
+    .board-wrapper {
+        padding: 12px 8px 22px;
     }
     .memory-board {
         gap: 7px;
     }
-    .board-wrapper {
-        padding: 8px;
+    .cell {
+        min-width: 68px;
     }
     .header h1 {
         letter-spacing: 0;
@@ -691,7 +732,7 @@ body {
 
 @media (max-width: 380px) {
     .cell {
-        min-width: 56px;
+        min-width: 64px;
     }
     .memory-board {
         gap: 6px;
@@ -699,7 +740,9 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .cell,
     .cell-inner {
+        animation: none;
         transition: none;
     }
     .pokeball-logo {
